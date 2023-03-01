@@ -1,0 +1,32 @@
+import java.util.ArrayList;
+
+public class Epic extends Task {
+    private ArrayList<Subtask> subTasksList; //список субтасков эпика
+
+    public Epic(String taskName, String taskDescription) {
+        super(taskName, taskDescription, "NEW");
+        this.subTasksList = new ArrayList<>();
+    }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "taskName='" + taskName +
+                ", taskDescription='" + taskDescription + '\'' +
+                ", taskID=" + taskID +
+                ", taskState='" + taskState + '\'' +
+                '}';
+    }
+
+    public void addSubTask(Subtask subTask) {
+        subTasksList.add(subTask);
+    }
+
+    public void deleteSubTask(Subtask subtask) {
+        subTasksList.remove(subtask);
+    }
+
+    public ArrayList<Subtask> getSubTasksList() {
+        return subTasksList;
+    }
+}
