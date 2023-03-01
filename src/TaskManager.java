@@ -1,9 +1,11 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class TaskManager {
-    private HashMap<Integer, Task> tasksList = new HashMap<>();
-    private HashMap<Integer, Epic> epicsList = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasksList = new HashMap<>();
+    private final HashMap<Integer, Task> tasksList = new HashMap<>();
+    private final HashMap<Integer, Epic> epicsList = new HashMap<>();
+    private final HashMap<Integer, Subtask> subtasksList = new HashMap<>();
     private Integer taskId = 0;
     private Integer epicId = 0;
     private Integer subtaskId = 0;
@@ -26,24 +28,37 @@ public class TaskManager {
         subtasksList.put(subtaskId, subtask);
         subtask.taskID = subtaskId;
         subtaskId++;
+        Epic epic;
+        epic = epicsList.get(subtask.getBelongsToEpicIP());
+        epic.setTaskState(setEpicState(epic));
         return subtask;
     }
 
-    public HashMap<Integer, Task> getTasksList() {
-        return tasksList;
+    public List<Task> getTasksList() {
+        return new ArrayList<>(tasksList.values());
     }
 
-    public HashMap<Integer, Epic> getEpicsList() {
-        return epicsList;
+    public List<Epic> getEpicsList() {
+        return new ArrayList<>(epicsList.values());
     }
 
-    public HashMap<Integer, Subtask> getSubtasksList() {
-        return subtasksList;
+    public List<Subtask> getSubtasksList() {
+        return new ArrayList<>(subtasksList.values());
     }
 
     public void deleteAllTasks() {
         tasksList.clear();
+    }
+
+    public void deleteAllSubTasks() {
+        for (Epic epic : epicsList.values()) {
+            epic.getSubTasksList().clear();
+        }
         subtasksList.clear();
+    }
+
+    public void deleteAllEpics() {
+        deleteAllSubTasks();
         epicsList.clear();
     }
 
@@ -64,14 +79,21 @@ public class TaskManager {
     }
 
     public void removeEpicFromId(Integer id) {
+        Epic epic = epicsList.get(id);
+        for (Subtask subtask : epic.getSubTasksList()) {
+            subtasksList.remove(subtask.getID());
+        }
         epicsList.remove(id);
     }
 
     public void removeSubtaskFromId(Integer id) {
         Subtask subtask;
+        Epic epic;
         subtask = subtasksList.get(id);
-        subtask.getBelongsToEpic().deleteSubTask(subtask); //удалили ссылку на суб из эпика
+        epic = epicsList.get(subtask.getBelongsToEpicIP());
+        epic.deleteSubTask(subtask); //удалили ссылку на суб из эпика
         subtasksList.remove(id);
+        epic.setTaskState(setEpicState(epic));
     }
 
     public void updateTask(Task task) {
@@ -80,7 +102,9 @@ public class TaskManager {
 
     public void updateSubtask(Subtask subtask) {
         subtasksList.put(subtask.getID(), subtask);
-        subtask.getBelongsToEpic().setTaskState(setEpicState(subtask.getBelongsToEpic()));
+        Epic epic;
+        epic = epicsList.get(subtask.getBelongsToEpicIP());
+        epic.setTaskState(setEpicState(epic));
     }
 
     public void updateEpic(Epic epic) {

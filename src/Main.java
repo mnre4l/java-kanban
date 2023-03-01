@@ -15,7 +15,7 @@ public class Main {
 
         Epic firstEpicTask = new Epic("Сдать 3й спринт", "Сделать работу и сдать");
         manager.createEpic(firstEpicTask);
-        Subtask firstSubToFirstEpic = new Subtask("Cделать работу и прислать Роме",
+        Subtask firstSubToFirstEpic = new Subtask("Cделать работу и прислать",
                 "ну на ревью", "NEW", firstEpicTask);
         manager.createSubtask(firstSubToFirstEpic);
         Subtask secondSubToFirstEpic = new Subtask("Все переделать xD", "После ревью",
@@ -63,5 +63,10 @@ public class Main {
         Integer id = 1;
         manager.removeSubtaskFromId(id);
         System.out.println(manager.getSubtasksList());
+
+        System.out.println("удалили все эпики");
+        manager.deleteAllEpics();
+        System.out.println(manager.getSubtasksList());
+        System.out.println(manager.getEpicsList());
     }
 }
