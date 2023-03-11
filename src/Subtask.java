@@ -1,8 +1,8 @@
 public class Subtask extends Task {
     private final Integer epicBelongsID;
 
-    public Subtask(String taskName, String taskDescription, String taskState, Epic belongsToEpic) {
-        super(taskName, taskDescription, taskState);
+    public Subtask(String taskName, String taskDescription, TaskState state, Epic belongsToEpic) {
+        super(taskName, taskDescription, state);
         this.epicBelongsID = belongsToEpic.getID();
         belongsToEpic.addSubTask(this); // добавляем субтаск в список субтасков этого эпика
     }

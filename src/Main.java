@@ -1,13 +1,16 @@
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager manager = new TaskManager();
+        TaskManager manager = Managers.getDefault();
+
+
+
 
         Task firstTestTask = new Task("Создать задачу", "Создаем задачу потестировать",
-                "NEW");
+                TaskState.NEW);
         manager.createTask(firstTestTask);
         Task secondTestTask = new Task("Создать еще задачу", "Создаем еще задачу " +
-                        "потестировать", "NEW");
+                "потестировать", TaskState.NEW);
         manager.createTask(secondTestTask);
 
         System.out.println(firstTestTask);
@@ -16,16 +19,16 @@ public class Main {
         Epic firstEpicTask = new Epic("Сдать 3й спринт", "Сделать работу и сдать");
         manager.createEpic(firstEpicTask);
         Subtask firstSubToFirstEpic = new Subtask("Cделать работу и прислать",
-                "ну на ревью", "NEW", firstEpicTask);
+                "ну на ревью", TaskState.NEW, firstEpicTask);
         manager.createSubtask(firstSubToFirstEpic);
         Subtask secondSubToFirstEpic = new Subtask("Все переделать xD", "После ревью",
-                "NEW", firstEpicTask);
+                TaskState.NEW, firstEpicTask);
         manager.createSubtask(secondSubToFirstEpic);
 
         Epic secondEpic = new Epic("Придумать второй эпик", "а то уже сложно");
         manager.createEpic(secondEpic);
         Subtask firstSubToSecondEpic = new Subtask("Придумать суб", "а то тоже сложно",
-                "NEW", secondEpic);
+                TaskState.NEW, secondEpic);
         manager.createSubtask(firstSubToSecondEpic);
 
         System.out.println(firstEpicTask);
@@ -43,12 +46,12 @@ public class Main {
 
         System.out.println("firstSubToSecondEpic subtask ID: " + firstSubToSecondEpic.getID());
 
-        firstTestTask.setTaskState("IN_PROGRESS");
+        firstTestTask.setTaskState(TaskState.IN_PROGRESS);
         manager.updateTask(firstTestTask);
 
-        firstSubToFirstEpic.setTaskState("DONE");
+        firstSubToFirstEpic.setTaskState(TaskState.DONE);
         manager.updateSubtask(secondSubToFirstEpic);
-        secondSubToFirstEpic.setTaskState("DONE");
+        secondSubToFirstEpic.setTaskState(TaskState.DONE);
         manager.updateSubtask(secondSubToFirstEpic);
 
         secondEpic.setTaskDescription("изменили описание");
@@ -65,8 +68,15 @@ public class Main {
         System.out.println(manager.getSubtasksList());
 
         System.out.println("удалили все эпики");
-        manager.deleteAllEpics();
         System.out.println(manager.getSubtasksList());
         System.out.println(manager.getEpicsList());
+
+
+        Task task1 = manager.getTaskFromId(0);
+        System.out.println(manager.getHistoryList());
+        Task task2 = manager.getEpicFromId(0);
+        System.out.println(manager.getHistoryList());
+
+
     }
 }

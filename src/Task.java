@@ -2,20 +2,20 @@ public class Task {
     protected String taskName;
     protected String taskDescription;
     protected Integer taskID;
-    protected String taskState;
+    protected TaskState taskState;
 
-    public Task(String taskName, String taskDescription, String taskState) {
+    public Task(String taskName, String taskDescription, TaskState state) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
-        this.taskState = taskState;
+        this.taskState = state;
     }
 
     public Integer getID() {
         return taskID;
     }
 
-    public void setTaskState(String taskState) {
-        this.taskState = taskState;
+    public void setTaskState(TaskState state) {
+        this.taskState = state;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class Task {
         return taskID;
     }
 
-    public String getTaskState() {
+    public TaskState getTaskState() {
         return taskState;
     }
 

@@ -4,7 +4,7 @@ public class Epic extends Task {
     private ArrayList<Subtask> subTasksList; //список субтасков эпика
 
     public Epic(String taskName, String taskDescription) {
-        super(taskName, taskDescription, "NEW");
+        super(taskName, taskDescription, TaskState.NEW);
         this.subTasksList = new ArrayList<>();
     }
 
