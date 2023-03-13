@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final static int HISTORY_LIST_SIZE = 10; //пока здесь, но видимо должно быть в конструктуре?
+    private final static int HISTORY_LIST_SIZE = 10;
     private final List<Task> historyList = new ArrayList<>();
 
     @Override
@@ -12,11 +12,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void addTask(Task task) {
+        historyList.add(task);
         if (historyList.size() <= HISTORY_LIST_SIZE) {
-            historyList.add(task);
         } else {
             historyList.remove(0);
-            historyList.add(task);
         }
     }
 
