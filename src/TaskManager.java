@@ -15,28 +15,27 @@ public interface TaskManager {
 
     void deleteAllTasks();
 
-    TaskState setEpicState(Epic epic);
-
     void deleteAllSubTasks();
 
     void deleteAllEpics();
 
-    Task getTaskFromId(Integer id);
+    Task getTaskById(Integer id);
 
-    Epic getEpicFromId(Integer id);
+    Epic getEpicById(Integer id);
 
-    Subtask getSubtaskFromId(Integer id);
+    Subtask getSubtaskById(Integer id);
 
-    void removeTaskFromId(Integer id);
+    void removeTaskById(Integer id);
 
-    void removeEpicFromId(Integer id);
+    void removeEpicById(Integer id);
 
-    void removeSubtaskFromId(Integer id);
+    void removeSubtaskById(Integer id);
 
     void updateTask(Task task);
 
     void updateSubtask(Subtask subtask);
 
     void updateEpic(Epic epic);
+
     List<Task> getHistoryList();
 }

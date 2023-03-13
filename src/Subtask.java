@@ -1,25 +1,25 @@
 public class Subtask extends Task {
-    private final Integer epicBelongsID;
+    private final Integer epicBelongsId;
 
     public Subtask(String taskName, String taskDescription, TaskState state, Epic belongsToEpic) {
         super(taskName, taskDescription, state);
-        this.epicBelongsID = belongsToEpic.getID();
+        this.epicBelongsId = belongsToEpic.getTaskId();
         belongsToEpic.addSubTask(this); // добавляем субтаск в список субтасков этого эпика
     }
 
     @Override
     public String toString() {
         return "Subtask{" +
-                "epicBelongsID=" + epicBelongsID +
+                "epicBelongsID=" + epicBelongsId +
                 ", taskName='" + taskName + '\'' +
                 ", taskDescription='" + taskDescription + '\'' +
-                ", taskID=" + taskID +
+                ", taskID=" + taskId +
                 ", taskState='" + taskState + '\'' +
                 '}';
     }
 
-    public Integer getBelongsToEpicIP() {
-        return epicBelongsID;
+    public Integer getBelongsToEpicId() {
+        return epicBelongsId;
     }
 
 }

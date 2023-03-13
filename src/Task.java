@@ -1,17 +1,13 @@
 public class Task {
     protected String taskName;
     protected String taskDescription;
-    protected Integer taskID;
+    protected Integer taskId;
     protected TaskState taskState;
 
     public Task(String taskName, String taskDescription, TaskState state) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskState = state;
-    }
-
-    public Integer getID() {
-        return taskID;
     }
 
     public void setTaskState(TaskState state) {
@@ -23,7 +19,7 @@ public class Task {
         return "Task{" +
                 "taskName='" + taskName + '\'' +
                 ", taskDescription='" + taskDescription + '\'' +
-                ", taskID=" + taskID +
+                ", taskID=" + taskId +
                 ", taskState='" + taskState + '\'' +
                 '}';
     }
@@ -36,16 +32,16 @@ public class Task {
         this.taskDescription = taskDescription;
     }
 
-    public void setTaskID(Integer taskID) {
-        this.taskID = taskID;
+    public void setTaskId(Integer taskId) {
+        this.taskId = taskId;
     }
 
     public String getTaskDescription() {
         return taskDescription;
     }
 
-    public Integer getTaskID() {
-        return taskID;
+    public Integer getTaskId() {
+        return taskId;
     }
 
     public TaskState getTaskState() {

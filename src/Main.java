@@ -44,7 +44,7 @@ public class Main {
         System.out.println("Subtasks list: " + manager.getSubtasksList());
         System.out.println("Tasks list: " + manager.getTasksList());
 
-        System.out.println("firstSubToSecondEpic subtask ID: " + firstSubToSecondEpic.getID());
+        System.out.println("firstSubToSecondEpic subtask ID: " + firstSubToSecondEpic.getTaskId());
 
         firstTestTask.setTaskState(TaskState.IN_PROGRESS);
         manager.updateTask(firstTestTask);
@@ -64,7 +64,9 @@ public class Main {
 
         System.out.println("удаляем 2ю субтаск из 1 эпика по айди");
         Integer id = 1;
-        manager.removeSubtaskFromId(id);
+        manager.removeSubtaskById(id);
+        id = 4;
+        manager.removeSubtaskById(id);
         System.out.println(manager.getSubtasksList());
 
         System.out.println("удалили все эпики");
@@ -72,9 +74,9 @@ public class Main {
         System.out.println(manager.getEpicsList());
 
 
-        Task task1 = manager.getTaskFromId(0);
+        Task task1 = manager.getTaskById(0);
         System.out.println(manager.getHistoryList());
-        Task task2 = manager.getEpicFromId(0);
+        Task task2 = manager.getEpicById(0);
         System.out.println(manager.getHistoryList());
 
 
