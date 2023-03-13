@@ -65,6 +65,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteAllSubTasks() {
         for (Epic epic : epicsList.values()) {
             epic.getSubTasksList().clear();
+            epic.setTaskState(TaskState.NEW);
         }
         subtasksList.clear();
     }
@@ -198,20 +199,26 @@ public class InMemoryTaskManager implements TaskManager {
 
     public TaskState setEpicState(Epic epic) {
         boolean isDone;
+        boolean isNew;
+
         isDone = true;
         for (Subtask subtask : epic.getSubTasksList()) {
             if (subtask.getTaskState() == TaskState.IN_PROGRESS) {
-                return TaskState.IN_PROGRESS; //если хотя бы 1 субтаск из эпика в процессе - возвращаем эпику статус в процессе
+                return TaskState.IN_PROGRESS; //если хотя бы 1 субтаск из эпика в процессе - возвращаем эпику статус
+                // в процессе
             }
-            //здесь или DONE или NEW
             if (subtask.getTaskState() == TaskState.NEW) {
                 isDone = false;
+            } else if (subtask.getTaskState() == TaskState.DONE) {
+                isNew = false;
             }
         }
         if (isDone) {
             return TaskState.DONE;
+        } else if (isNew) {
+            return TaskState.NEW
         } else {
-            return TaskState.NEW;
+            return TaskState.IN_PROGRESS;
         }
     }
 }
