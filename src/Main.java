@@ -49,9 +49,9 @@ public class Main {
         firstTestTask.setTaskState(TaskState.IN_PROGRESS);
         manager.updateTask(firstTestTask);
 
-        firstSubToFirstEpic.setTaskState(TaskState.DONE);
+        firstSubToFirstEpic.setTaskState(TaskState.NEW);
         manager.updateSubtask(secondSubToFirstEpic);
-        secondSubToFirstEpic.setTaskState(TaskState.DONE);
+        secondSubToFirstEpic.setTaskState(TaskState.IN_PROGRESS);
         manager.updateSubtask(secondSubToFirstEpic);
 
         secondEpic.setTaskDescription("изменили описание");
@@ -76,7 +76,7 @@ public class Main {
 
         Task task1 = manager.getTaskById(0);
         System.out.println(manager.getHistoryList());
-        Task task2 = manager.getEpicById(0);
+        Task task2 = manager.getEpicById(2);
         System.out.println(manager.getHistoryList());
 
 

@@ -79,6 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(Integer id) {
         boolean isTaskInList = false;
+
         for (Task task : tasksList.values()) {
             if (task.getTaskId() == id) {
                 isTaskInList = true;
@@ -86,7 +87,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (!isTaskInList) {
             System.out.println("Таска с таким id нет");
-            return;
+            return null;
         }
         historyManager.addTask(tasksList.get(id));
         return tasksList.get(id);
@@ -95,6 +96,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpicById(Integer id) {
         boolean isTaskInList = false;
+
         for (Epic epic : epicsList.values()) {
             if (epic.getTaskId() == id) {
                 isTaskInList = true;
@@ -102,7 +104,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (!isTaskInList) {
             System.out.println("Эпика с таким id нет");
-            return;
+            return null;
         }
         historyManager.addTask(epicsList.get(id));
         return epicsList.get(id);
@@ -111,6 +113,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtaskById(Integer id) {
         boolean isTaskInList = false;
+
         for (Subtask subtask : subtasksList.values()) {
             if (subtask.getTaskId() == id) {
                 isTaskInList = true;
@@ -118,7 +121,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (!isTaskInList) {
             System.out.println("Субтаска с таким id у этого эпика нет");
-            return;
+            return null;
         }
         historyManager.addTask(subtasksList.get(id));
         return subtasksList.get(id);
@@ -127,6 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(Integer id) {
         boolean isTaskInList = false;
+
         for (Task task : tasksList.values()) {
             if (task.getTaskId() == id) {
                 isTaskInList = true;
@@ -142,6 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpicById(Integer id) {
         boolean isTaskInList = false;
+
         for (Epic epic : epicsList.values()) {
             if (epic.getTaskId() == id) {
                 isTaskInList = true;
@@ -161,6 +166,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeSubtaskById(Integer id) {
         boolean isTaskInList = false;
+
         for (Subtask subtask : subtasksList.values()) {
             if (subtask.getTaskId() == id) {
                 isTaskInList = true;
@@ -198,25 +204,25 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public TaskState setEpicState(Epic epic) {
-        boolean isDone;
-        boolean isNew;
+        int newTasksCount = 0;
+        int doneTasksCount = 0;
 
-        isDone = true;
+        if (epic.getSubTasksList().isEmpty()) {
+            return TaskState.NEW;
+        }
         for (Subtask subtask : epic.getSubTasksList()) {
             if (subtask.getTaskState() == TaskState.IN_PROGRESS) {
-                return TaskState.IN_PROGRESS; //если хотя бы 1 субтаск из эпика в процессе - возвращаем эпику статус
-                // в процессе
-            }
-            if (subtask.getTaskState() == TaskState.NEW) {
-                isDone = false;
+                return TaskState.IN_PROGRESS;
             } else if (subtask.getTaskState() == TaskState.DONE) {
-                isNew = false;
+                doneTasksCount++;
+            } else {
+                newTasksCount++;
             }
         }
-        if (isDone) {
+        if (epic.getSubTasksList().size() == newTasksCount) {
+            return TaskState.NEW;
+        } else if (epic.getSubTasksList().size() == doneTasksCount) {
             return TaskState.DONE;
-        } else if (isNew) {
-            return TaskState.NEW
         } else {
             return TaskState.IN_PROGRESS;
         }
