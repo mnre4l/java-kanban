@@ -3,82 +3,44 @@ public class Main {
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
 
+        Epic firstEpic = new Epic("1st epic", "1st epic descr");
+        manager.createEpic(firstEpic);
 
+        Subtask firstSubOfFirstEpic = new Subtask("1st sub of 1st epic", "1st sub 1st epic descr",
+                TaskState.NEW, firstEpic);
+        Subtask secondSubOfFirstEpic = new Subtask("2d sub of 1st epic", "2d sub 1st epic descr",
+                TaskState.NEW, firstEpic);
+        Subtask thirdSubOfFirstEpic = new Subtask("3d sub of 1st epic", "3d sub 1st epic descr",
+                TaskState.NEW, firstEpic);
+        manager.createSubtask(firstSubOfFirstEpic);
+        manager.createSubtask(secondSubOfFirstEpic);
+        manager.createSubtask(thirdSubOfFirstEpic);
 
-
-        Task firstTestTask = new Task("Создать задачу", "Создаем задачу потестировать",
-                TaskState.NEW);
-        manager.createTask(firstTestTask);
-        Task secondTestTask = new Task("Создать еще задачу", "Создаем еще задачу " +
-                "потестировать", TaskState.NEW);
-        manager.createTask(secondTestTask);
-
-        System.out.println(firstTestTask);
-        System.out.println(secondTestTask);
-
-        Epic firstEpicTask = new Epic("Сдать 3й спринт", "Сделать работу и сдать");
-        manager.createEpic(firstEpicTask);
-        Subtask firstSubToFirstEpic = new Subtask("Cделать работу и прислать",
-                "ну на ревью", TaskState.NEW, firstEpicTask);
-        manager.createSubtask(firstSubToFirstEpic);
-        Subtask secondSubToFirstEpic = new Subtask("Все переделать xD", "После ревью",
-                TaskState.NEW, firstEpicTask);
-        manager.createSubtask(secondSubToFirstEpic);
-
-        Epic secondEpic = new Epic("Придумать второй эпик", "а то уже сложно");
+        Epic secondEpic = new Epic("2d epic", "2d epic descr");
         manager.createEpic(secondEpic);
-        Subtask firstSubToSecondEpic = new Subtask("Придумать суб", "а то тоже сложно",
-                TaskState.NEW, secondEpic);
-        manager.createSubtask(firstSubToSecondEpic);
 
-        System.out.println(firstEpicTask);
-        System.out.println(firstSubToFirstEpic);
-        System.out.println(secondSubToFirstEpic);
-
-
-        System.out.println(secondEpic);
-        System.out.println(firstSubToSecondEpic);
-
-
-        System.out.println("Epics list: " + manager.getEpicsList());
-        System.out.println("Subtasks list: " + manager.getSubtasksList());
-        System.out.println("Tasks list: " + manager.getTasksList());
-
-        System.out.println("firstSubToSecondEpic subtask ID: " + firstSubToSecondEpic.getTaskId());
-
-        firstTestTask.setTaskState(TaskState.IN_PROGRESS);
-        manager.updateTask(firstTestTask);
-
-        firstSubToFirstEpic.setTaskState(TaskState.NEW);
-        manager.updateSubtask(secondSubToFirstEpic);
-        secondSubToFirstEpic.setTaskState(TaskState.IN_PROGRESS);
-        manager.updateSubtask(secondSubToFirstEpic);
-
-        secondEpic.setTaskDescription("изменили описание");
-        manager.updateEpic(secondEpic);
-
-        System.out.println("updated:");
-        System.out.println("Epics list: " + manager.getEpicsList());
-        System.out.println("Subtasks list: " + manager.getSubtasksList());
-        System.out.println("Tasks list: " + manager.getTasksList());
-
-        System.out.println("удаляем 2ю субтаск из 1 эпика по айди");
-        Integer id = 1;
-        manager.removeSubtaskById(id);
-        id = 4;
-        manager.removeSubtaskById(id);
-        System.out.println(manager.getSubtasksList());
-
-        System.out.println("удалили все эпики");
-        System.out.println(manager.getSubtasksList());
-        System.out.println(manager.getEpicsList());
-
-
-        Task task1 = manager.getTaskById(0);
-        System.out.println(manager.getHistoryList());
-        Task task2 = manager.getEpicById(2);
+        System.out.println("1 история");
         System.out.println(manager.getHistoryList());
 
+        manager.getEpicById(0);
+        System.out.println("2я история, запрашивали эпик айди=0");
+        System.out.println(manager.getHistoryList());
+
+        manager.getEpicById(4);
+        manager.getSubtaskById(2);
+        manager.getEpicById(0);
+        System.out.println("3я история, запрашивали эпик айди=4, сабтаск айди=2, эпик айди=0");
+        System.out.println(manager.getHistoryList());
+
+        manager.removeSubtaskById(2);
+        System.out.println("удалили сабтаск айди=2");
+        System.out.println("История:");
+        System.out.println(manager.getHistoryList());
+
+        manager.removeEpicById(0);
+        System.out.println("удалили эпик айди=0, у которого осталось 2 сабтаска");
+        System.out.println("История:");
+        System.out.println(manager.getHistoryList());
 
     }
 }

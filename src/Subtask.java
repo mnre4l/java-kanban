@@ -13,7 +13,7 @@ public class Subtask extends Task {
                 "epicBelongsID=" + epicBelongsId +
                 ", taskName='" + taskName + '\'' +
                 ", taskDescription='" + taskDescription + '\'' +
-                ", taskID=" + taskId +
+                ", taskID=" + taskId + (char) 0x2615 +
                 ", taskState='" + taskState + '\'' +
                 '}';
     }
