@@ -1,5 +1,6 @@
 package service;
 
+import model.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,30 +20,27 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task createTask(Task task) {
         tasksList.put(taskId, task);
-        task.taskId = taskId;
+        task.setTaskId(taskId);
         taskId++;
-        historyManager.add(task);
         return task;
     }
 
     @Override
     public Epic createEpic(Epic epic) {
         epicsList.put(taskId, epic);
-        epic.taskId = taskId;
+        epic.setTaskId(taskId);
         taskId++;
-        historyManager.add(epic);
         return epic;
     }
 
     @Override
     public Subtask createSubtask(Subtask subtask) {
         subtasksList.put(taskId, subtask);
-        subtask.taskId = taskId;
+        subtask.setTaskId(taskId);
         taskId++;
         Epic epic;
         epic = epicsList.get(subtask.getBelongsToEpicId());
         epic.setTaskState(setEpicState(epic));
-        historyManager.add(subtask);
         return subtask;
     }
 
@@ -64,7 +62,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllTasks() {
         for (Task task : tasksList.values()) {
-            historyManager.remove(taskId);
+            historyManager.remove(task.getTaskId());
         }
         tasksList.clear();
     }
@@ -95,7 +93,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isTaskInList = false;
 
         for (Task task : tasksList.values()) {
-            if (task.getTaskId() == id) {
+            if (task.getTaskId().equals(id)) {
                 isTaskInList = true;
             }
         }
@@ -112,7 +110,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isTaskInList = false;
 
         for (Epic epic : epicsList.values()) {
-            if (epic.getTaskId() == id) {
+            if (epic.getTaskId().equals(id)) {
                 isTaskInList = true;
             }
         }
@@ -129,7 +127,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isTaskInList = false;
 
         for (Subtask subtask : subtasksList.values()) {
-            if (subtask.getTaskId() == id) {
+            if (subtask.getTaskId().equals(id)) {
                 isTaskInList = true;
             }
         }
@@ -146,7 +144,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isTaskInList = false;
 
         for (Task task : tasksList.values()) {
-            if (task.getTaskId() == id) {
+            if (task.getTaskId().equals(id)) {
                 isTaskInList = true;
             }
         }
@@ -163,7 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isTaskInList = false;
 
         for (Epic epic : epicsList.values()) {
-            if (epic.getTaskId() == id) {
+            if (epic.getTaskId().equals(id)) {
                 isTaskInList = true;
             }
         }
@@ -173,8 +171,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
         Epic epic = epicsList.get(id);
         for (Subtask subtask : epic.getSubTasksList()) {
-            subtasksList.remove(subtask.getTaskId());
             historyManager.remove(subtask.getTaskId());
+            subtasksList.remove(subtask.getTaskId());
         }
         epicsList.remove(id);
         historyManager.remove(id);
@@ -185,7 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isTaskInList = false;
 
         for (Subtask subtask : subtasksList.values()) {
-            if (subtask.getTaskId() == id) {
+            if (subtask.getTaskId().equals(id)) {
                 isTaskInList = true;
             }
         }

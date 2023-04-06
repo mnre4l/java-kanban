@@ -1,3 +1,6 @@
+package service;
+
+import model.*;
 import java.util.List;
 
 public interface TaskManager {

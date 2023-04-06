@@ -1,3 +1,5 @@
+package model;
+
 public class Task {
     protected String taskName;
     protected String taskDescription;
