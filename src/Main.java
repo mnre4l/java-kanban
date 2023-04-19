@@ -1,50 +1,37 @@
 import model.*;
 import service.*;
 
+import java.nio.file.Paths;
+
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager manager = Managers.getDefault();
 
-        Epic firstEpic = new Epic("1st epic", "1st epic descr");
-        manager.createEpic(firstEpic);
+            FileBackedTasksManager manager = Managers.getFileManager(Paths.get("taskmanager.csv"));
 
-        Subtask firstSubOfFirstEpic = new Subtask("1st sub of 1st epic", "1st sub 1st epic descr",
-                TaskState.NEW, firstEpic);
-        Subtask secondSubOfFirstEpic = new Subtask("2d sub of 1st epic", "2d sub 1st epic descr",
-                TaskState.NEW, firstEpic);
-        Subtask thirdSubOfFirstEpic = new Subtask("3d sub of 1st epic", "3d sub 1st epic descr",
-                TaskState.NEW, firstEpic);
-        manager.createSubtask(firstSubOfFirstEpic);
-        manager.createSubtask(secondSubOfFirstEpic);
-        manager.createSubtask(thirdSubOfFirstEpic);
+            Task task1 = manager.createTask(new Task("1st task", "1st task descr", TaskState.NEW));
+            Epic epic1 = manager.createEpic(new Epic("1st epic", "1st epic descr"));
+            Epic epic2 = manager.createEpic(new Epic("2d epic", "2d epic descr"));
 
-        Epic secondEpic = new Epic("2d epic", "2d epic descr");
-        manager.createEpic(secondEpic);
+            manager.getEpicById(2);
+            manager.getTaskById(0);
 
-        System.out.println("1 история");
-        System.out.println(manager.getHistoryList());
+            Subtask sub1 = manager.createSubtask(new Subtask("1st sub", "1st sub descr",
+                                                TaskState.NEW, epic1));
 
-        manager.getEpicById(0);
-        System.out.println("2я история, запрашивали эпик айди=0");
-        System.out.println(manager.getHistoryList());
+            manager.getSubtaskById(3);
+            System.out.println("История до: " + manager.getHistoryList());
 
-        manager.getEpicById(4);
-        manager.getSubtaskById(2);
-        manager.getEpicById(0);
-        manager.getSubtaskById(2);
-        System.out.println("3я история, запрашивали эпик айди=4, сабтаск айди=2, эпик айди=0, снова саб айди=2");
-        System.out.println(manager.getHistoryList());
-
-        manager.removeEpicById(4);
-        System.out.println("удалили эпик айди=4");
-        System.out.println("История:");
-        System.out.println(manager.getHistoryList());
-
-        manager.removeEpicById(0);
-        System.out.println("удалили эпик айди=0");
-        System.out.println("История:");
-        System.out.println(manager.getHistoryList());
+            try {
+                    FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(
+                                                        Paths.get("taskmanager.csv"));
+                    System.out.println(manager2.getEpicsList());
+                    System.out.println(manager2.getSubtasksList());
+                    System.out.println(manager2.getTasksList());
+                    System.out.println("История после: " + manager2.getHistoryList());
+            } catch (ManagerSaveException e) {
+                    System.out.println("Ошибка: " + e.getMessage());
+            }
 
     }
 }

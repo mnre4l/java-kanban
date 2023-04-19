@@ -5,11 +5,19 @@ public class Task {
     protected String taskDescription;
     protected Integer taskId;
     protected TaskState taskState;
+    protected TasksType taskType;
+    public static final int FILE_COLUM_NUM_ID = 0;
+    public static final int FILE_COLUM_NUM_TYPE = 1;
+    public static final int FILE_COLUM_NUM_NAME = 2;
+    public static final int FILE_COLUM_NUM_STATE = 3;
+    public static final int FILE_COLUM_NUM_DESCR = 4;
+    public static final int FILE_COLUM_NUM_EPICBELONGS = 5;
 
     public Task(String taskName, String taskDescription, TaskState state) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskState = state;
+        this.taskType = TasksType.TASK;
     }
 
     public void setTaskState(TaskState state) {
@@ -18,12 +26,8 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "taskName='" + taskName + '\'' +
-                ", taskDescription='" + taskDescription + '\'' +
-                ", taskID=" + taskId + (char) 0x2615 +
-                ", taskState='" + taskState + '\'' +
-                '}';
+        return this.taskId + "," + this.taskType + "," + this.taskName + "," + this.taskState + "," +
+                this.taskDescription + ",";
     }
 
     public void setTaskName(String taskName) {
