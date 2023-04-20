@@ -23,7 +23,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    public static FileBackedTasksManager loadFromFile(Path path) throws ManagerSaveException {
+    public static FileBackedTasksManager loadFromFile(Path path) {
         try {
             String content = Files.readString(path);
             FileBackedTasksManager manager = new FileBackedTasksManager(path);
@@ -47,7 +47,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             }
             return manager;
         } catch (IOException ex) {
-            throw new ManagerSaveException("IO ex при загрузке");
+            System.out.println("IO ex при загрузке");
+            return null;
+        } catch (ManagerSaveException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+            return null;
         }
     }
 
@@ -68,7 +72,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return history.toString();
     }
 
-    public static List<Integer> historyFromString(String value) {
+    private static List<Integer> historyFromString(String value) {
         List<Integer> historyIdList = new ArrayList<>();
         for (String stringId : value.split(",")) {
             historyIdList.add(Integer.parseInt(stringId));
@@ -98,33 +102,37 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    public Task fromString(String value) {
+    private Task fromString(String value) {
         String[] taskParams = value.split(",");
         Integer id = Integer.parseInt(taskParams[Task.FILE_COLUM_NUM_ID]);
         String state = taskParams[Task.FILE_COLUM_NUM_STATE];
         String name = taskParams[Task.FILE_COLUM_NUM_NAME];
         String description = taskParams[Task.FILE_COLUM_NUM_DESCR];
         String type = taskParams[Task.FILE_COLUM_NUM_TYPE];
+        Integer lastTaskId = taskId;
 
         if (type.equals(TasksType.TASK.toString())) {
             Task task = new Task(name, description, TaskState.valueOf(state));
-            taskId = Math.max(taskId, id);
+            taskId = id;
             super.createTask(task);
+            taskId = Math.max(taskId, lastTaskId);
             return task;
         }
 
         if (type.equals(TasksType.EPIC.toString())) {
             Epic epic = new Epic(name, description);
-            taskId = Math.max(taskId, id);
+            taskId = id;
             super.createEpic(epic);
+            taskId = Math.max(taskId, lastTaskId);
             return epic;
         }
 
         if (type.equals(TasksType.SUBTASK.toString())) {
             int epicBelongs = Integer.parseInt(taskParams[Task.FILE_COLUM_NUM_EPICBELONGS]);
             Subtask subtask = new Subtask(name, description, TaskState.valueOf(state), epicsList.get(epicBelongs));
-            taskId = Math.max(taskId, id);
+            taskId = id;
             super.createSubtask(subtask);
+            taskId = Math.max(taskId, lastTaskId);
             return subtask;
         }
         return null;

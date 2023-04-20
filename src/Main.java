@@ -21,17 +21,11 @@ public class Main {
 
             manager.getSubtaskById(3);
             System.out.println("История до: " + manager.getHistoryList());
-
-            try {
-                    FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(
-                                                        Paths.get("taskmanager.csv"));
-                    System.out.println(manager2.getEpicsList());
-                    System.out.println(manager2.getSubtasksList());
-                    System.out.println(manager2.getTasksList());
-                    System.out.println("История после: " + manager2.getHistoryList());
-            } catch (ManagerSaveException e) {
-                    System.out.println("Ошибка: " + e.getMessage());
-            }
-
+            Epic epic3 = manager.createEpic(new Epic("3d epic", "3d epic descr"));
+            FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(Paths.get("taskmanager.csv"));
+            System.out.println(manager2.getEpicsList());
+            System.out.println(manager2.getSubtasksList());
+            System.out.println(manager2.getTasksList());
+            System.out.println("История после: " + manager2.getHistoryList());
     }
 }
