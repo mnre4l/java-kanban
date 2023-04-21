@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
     private Path file;
+    private final static String FILE_TABLE_HEADER = "id,type,name,status,description,epic";
 
     public FileBackedTasksManager(Path file) throws ManagerSaveException {
         try {
@@ -27,23 +28,46 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         try {
             String content = Files.readString(path);
             FileBackedTasksManager manager = new FileBackedTasksManager(path);
+
+            /*
+             проверка на файл, который содержит шапку + пустую строку (после удаления тасков), наверное
+             cамое простое:
+
+            if (content.equals(FILE_TABLE_HEADER + "\n")) {
+                ...
+            }
+             но решил добавить (вероятно кривоватый как и все остальное:D) валидатор для истории isValidateHistoryString()
+             только для истории - потому что для нее всегда берется строка с индексом на 1 меньше размера
+             распарсенного содержимого файла (задачу просто не возьмем, если файл кроме шапки пуст
+             соответсвенно, если попала пустая строка, или выражение в шапке, или неверный формат
+             (не числа через запятую) - вернет менеджер с пустой историей
+
+             для задач аналогичную проверку делать не стал, потому что как я понял исходим из аксиомы (по тз),
+             что файл намеренно никто не ломает и он приходит в верном формате
+             */
+
             String[] fileContent = content.split("\n");
+            int i = 1;
 
-            List<Integer> historyFromList = historyFromString(fileContent[fileContent.length - 1]);
-
-            for (int i = 1; i < fileContent.length - 2; i++) {
-                manager.fromString(fileContent[i]);
+            while (i < fileContent.length && !fileContent[i].isEmpty()) {
+                manager.fromString(fileContent[i++]);
             }
 
-            Collections.reverse(historyFromList);
-            for (Integer id : historyFromList) {
-                if (manager.tasksList.containsKey(id)) {
-                    manager.historyManager.add(manager.getTaskById(id));
-                } else if (manager.epicsList.containsKey(id)) {
-                    manager.historyManager.add(manager.getEpicById(id));
-                } else {
-                    manager.historyManager.add(manager.getSubtaskById(id));
+            try {
+                List<Integer> historyFromList = historyFromString(fileContent[fileContent.length - 1]);
+                Collections.reverse(historyFromList);
+                for (Integer id : historyFromList) {
+                    if (manager.tasksList.containsKey(id)) {
+                        manager.historyManager.add(manager.getTaskById(id));
+                    } else if (manager.epicsList.containsKey(id)) {
+                        manager.historyManager.add(manager.getEpicById(id));
+                    } else {
+                        manager.historyManager.add(manager.getSubtaskById(id));
+                    }
                 }
+            } catch (ManagerSaveException e) {
+                System.out.println("Не получилось создать историю нового менеджера. Причина: " + e.getMessage() +
+                        " или пустой файл (отсутствует история)");
             }
             return manager;
         } catch (IOException ex) {
@@ -72,8 +96,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return history.toString();
     }
 
-    private static List<Integer> historyFromString(String value) {
+    private static boolean isValidateHistoryString(String value) {
+        boolean isValidate = true;
+        String[] valueSplit = value.split(",");
+
+        if (value.isEmpty() || value.isBlank() || value == null || valueSplit.length == 1) {
+            isValidate = false;
+        }
+
+        for (String item : valueSplit) {
+            for (int i = 0; i < item.length() && isValidate; i++) {
+                if (!Character.isDigit(item.charAt(i))) {
+                    isValidate = false;
+                }
+            }
+        }
+        return isValidate;
+
+    }
+
+    private static List<Integer> historyFromString(String value) throws ManagerSaveException {
         List<Integer> historyIdList = new ArrayList<>();
+        if (!isValidateHistoryString(value)) {
+            throw new ManagerSaveException("Неверный формат записи истории в файле");
+        }
         for (String stringId : value.split(",")) {
             historyIdList.add(Integer.parseInt(stringId));
         }
@@ -82,7 +128,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private void save() throws ManagerSaveException {
         try (FileWriter fileWriter = new FileWriter(file.toString())) {
-            fileWriter.write("id,type,name,status,description,epic");
+            fileWriter.write(FILE_TABLE_HEADER);
         } catch (IOException e) {
             throw new ManagerSaveException("IO ex при сохранении");
         }
@@ -101,6 +147,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             throw new ManagerSaveException("IO ex при сохранении");
         }
     }
+
+
 
     private Task fromString(String value) {
         String[] taskParams = value.split(",");

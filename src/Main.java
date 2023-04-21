@@ -10,6 +10,7 @@ public class Main {
             FileBackedTasksManager manager = Managers.getFileManager(Paths.get("taskmanager.csv"));
 
             Task task1 = manager.createTask(new Task("1st task", "1st task descr", TaskState.NEW));
+
             Epic epic1 = manager.createEpic(new Epic("1st epic", "1st epic descr"));
             Epic epic2 = manager.createEpic(new Epic("2d epic", "2d epic descr"));
 
@@ -21,11 +22,22 @@ public class Main {
 
             manager.getSubtaskById(3);
             System.out.println("История до: " + manager.getHistoryList());
+
             Epic epic3 = manager.createEpic(new Epic("3d epic", "3d epic descr"));
+
+            /*
+            manager.deleteAllSubTasks();
+            manager.deleteAllEpics();
+            manager.deleteAllTasks();
+            */
+
             FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(Paths.get("taskmanager.csv"));
+
             System.out.println(manager2.getEpicsList());
             System.out.println(manager2.getSubtasksList());
             System.out.println(manager2.getTasksList());
             System.out.println("История после: " + manager2.getHistoryList());
+
+
     }
 }
