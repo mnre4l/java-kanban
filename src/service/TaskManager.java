@@ -1,6 +1,8 @@
 package service;
 
 import model.*;
+
+import java.time.Instant;
 import java.util.List;
 
 public interface TaskManager {
@@ -41,4 +43,12 @@ public interface TaskManager {
     void updateEpic(Epic epic);
 
     List<Task> getHistoryList();
+
+    TaskState calculateEpicState(Epic epic);
+
+    Instant calculateEpicStartTime(Epic epic);
+
+    int calculateEpicDuration(Epic epic);
+
+    List<Task> getPrioritizedTasks();
 }

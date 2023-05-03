@@ -1,16 +1,45 @@
 package service;
 
 import model.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.Comparator;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasksList = new HashMap<>();
     protected final HashMap<Integer, Epic> epicsList = new HashMap<>();
     protected final HashMap<Integer, Subtask> subtasksList = new HashMap<>();
+    protected final HashMap<Instant, Boolean> timeBookingTable = new HashMap<>();
+    protected final TreeSet<Task> prioritizedTasks = new TreeSet<Task>(new Comparator<>() {
+        @Override
+        public int compare(Task o1, Task o2) {
+            if (o1.getTaskId() == o2.getTaskId()) {
+                return 0;
+            }
+            if (!o1.isUserSetTime()) {
+                return 1;
+            }
+            if (!o2.isUserSetTime()) {
+                return -1;
+            }
+            return o1.getStartTime().compareTo(o2.getStartTime());
+        }
+    });
     protected Integer taskId = 0;
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected static final int MIN_TASK_DURATION_MINUTES = 15;
+
+    public InMemoryTaskManager() {
+        initBooking();
+    }
+
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        List<Task> list = new ArrayList<>();
+        list.addAll(prioritizedTasks);
+        return list;
+    }
 
     @Override
     public List<Task> getHistoryList() {
@@ -19,8 +48,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task createTask(Task task) {
+        if (!isValidateTaskTime(task)) {
+            return null;
+        }
         tasksList.put(taskId, task);
         task.setTaskId(taskId);
+        prioritizedTasks.add(task);
         taskId++;
         return task;
     }
@@ -35,17 +68,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask createSubtask(Subtask subtask) {
+        if (!isValidateTaskTime(subtask)) {
+            return null;
+        }
         subtasksList.put(taskId, subtask);
         subtask.setTaskId(taskId);
+        prioritizedTasks.add(subtask);
         taskId++;
         Epic epic;
         epic = epicsList.get(subtask.getBelongsToEpicId());
         epic.setTaskState(calculateEpicState(epic));
+        epic.setDuration(calculateEpicDuration(epic));
+        epic.setStartTime(calculateEpicStartTime(epic));
+        epic.setEndTime(epic.getDuration());
         return subtask;
     }
 
     @Override
-    public List<Task> getTasksList() { //не очень понятно, нужно ли в этом случае обновлять историю - пока не стал
+    public List<Task> getTasksList() {
         return new ArrayList<>(tasksList.values());
     }
 
@@ -62,6 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllTasks() {
         for (Integer id : tasksList.keySet()) {
+            prioritizedTasks.remove(getTaskById(id));
             historyManager.remove(id);
         }
         tasksList.clear();
@@ -70,10 +111,14 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllSubTasks() {
         for(Integer id : subtasksList.keySet()) {
+            prioritizedTasks.remove(getSubtaskById(id));
             historyManager.remove(id);
 
             Integer epicId = subtasksList.get(id).getBelongsToEpicId();
 
+            epicsList.get(epicId).setDuration(0);
+            epicsList.get(epicId).setStartTime(Instant.now());
+            epicsList.get(epicId).setEndTime(0);
             epicsList.get(epicId).setTaskState(TaskState.NEW);
             epicsList.get(epicId).getSubTasksList().clear();
         }
@@ -125,6 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(Integer id) {
         if (tasksList.containsKey(id)) {
+            prioritizedTasks.remove(getTaskById(id));
             tasksList.remove(id);
             historyManager.remove(id);
         } else {
@@ -143,6 +189,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Subtask subtask : epic.getSubTasksList()) {
             historyManager.remove(subtask.getTaskId());
             subtasksList.remove(subtask.getTaskId());
+            prioritizedTasks.remove(subtask);
         }
         epicsList.remove(id);
         historyManager.remove(id);
@@ -158,26 +205,45 @@ public class InMemoryTaskManager implements TaskManager {
         Subtask subtask;
         Epic epic;
         subtask = subtasksList.get(id);
+        prioritizedTasks.remove(subtask);
         epic = epicsList.get(subtask.getBelongsToEpicId());
         epic.deleteSubTask(subtask); //удалили ссылку на суб из эпика
         subtasksList.remove(id);
         epic.setTaskState(calculateEpicState(epic));
+        epic.setDuration(calculateEpicDuration(epic));
+        epic.setStartTime(calculateEpicStartTime(epic));
+        epic.setEndTime(epic.getDuration());
         historyManager.remove(id);
     }
 
     @Override
     public void updateTask(Task task) {
-        tasksList.put(task.getTaskId(), task);
+        if (isValidateTaskTime(task)) {
+            prioritizedTasks.remove(getTaskById(task.getTaskId()));
+            tasksList.put(task.getTaskId(), task);
+            prioritizedTasks.add(task);
+        } else {
+            System.out.println("Время в обновленной задаче некорректное");
+        }
     }
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        subtasksList.put(subtask.getTaskId(), subtask);
+        if (isValidateTaskTime(subtask)) {
+            prioritizedTasks.remove(getSubtaskById(subtask.getTaskId()));
+            subtasksList.put(subtask.getTaskId(), subtask);
 
-        Epic epic;
+            Epic epic;
+            epic = epicsList.get(subtask.getBelongsToEpicId());
 
-        epic = epicsList.get(subtask.getBelongsToEpicId());
-        epic.setTaskState(calculateEpicState(epic));
+            epic.setTaskState(calculateEpicState(epic));
+            epic.setDuration(calculateEpicDuration(epic));
+            epic.setStartTime(calculateEpicStartTime(epic));
+            epic.setEndTime(epic.getDuration());
+            prioritizedTasks.add(subtask);
+        } else {
+            System.out.println("Время в обновленной задаче некорректное");
+        }
     }
 
     @Override
@@ -208,5 +274,88 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             return TaskState.IN_PROGRESS;
         }
+    }
+
+    public Instant calculateEpicStartTime(Epic epic) {
+        Instant startTime = Instant.MAX;
+
+        for (Subtask subtask : epic.getSubTasksList()) {
+            if (subtask.getStartTime().compareTo(startTime) < 0) {
+                startTime = subtask.getStartTime();
+            }
+        }
+        return startTime;
+    }
+
+    public int calculateEpicDuration(Epic epic) {
+        int duration = 0;
+
+        for (Subtask subtask : epic.getSubTasksList()) {
+            duration += subtask.getDuration();
+        }
+        return duration;
+    }
+
+    protected void initBooking() {
+        int currentYear = Instant.now().atZone(ZoneId.systemDefault()).getYear();
+        int currentMonth = Instant.now().atZone(ZoneId.systemDefault()).getMonthValue();
+        int currentDay = Instant.now().atZone(ZoneId.systemDefault()).getDayOfMonth();
+        Instant start = Instant.parse(String.format("%d-%d%d-%d%dT00:00:00Z", currentYear, currentMonth / 10,
+                currentMonth % 10, currentDay / 10, currentDay % 10));
+
+        //планируем от сегодняшего дня до конца года
+        //1 задача - минимум 15 минут
+        while (!start.equals(Instant.parse(String.format("%d-01-01T00:00:00Z", currentYear + 1)))) {
+            timeBookingTable.put(start, true);
+            start = start.plusSeconds(15 * 60);
+        }
+    }
+
+    protected boolean isValidateTaskTime(Task task) {
+        boolean isValidate = true;
+
+        if (!task.isUserSetTime()) {
+            return true;
+        }
+        if (task.getDuration() < MIN_TASK_DURATION_MINUTES) {
+            System.out.println("Минимальное время задачи (минут): " + MIN_TASK_DURATION_MINUTES);
+            return false;
+        }
+
+        Instant startTime = task.getStartTime();
+        Instant endTime = task.getEndTime();
+
+        boolean isValidateMinutes = startTime.atZone(ZoneId.systemDefault()).getMinute() % 15 == 0;
+        boolean isValidateSeconds = startTime.atZone(ZoneId.systemDefault()).getSecond() == 0;
+        boolean isValidateYear = startTime.atZone(ZoneId.systemDefault()).getYear() ==
+                Instant.now().atZone(ZoneId.systemDefault()).getYear();
+
+        if (!isValidateSeconds || !isValidateMinutes || !isValidateYear) {
+            System.out.println("Время задачи должны быть в этом году и лежать на сетке (минут): " + MIN_TASK_DURATION_MINUTES);
+            return false;
+        }
+
+        Instant check = task.getStartTime();
+
+        while (check.isBefore(endTime) && isValidate) {
+            isValidate = timeBookingTable.get(startTime);
+            if (!isValidate) {
+                System.out.println("Задача " + task.getTaskName() + ". Время занято: " + startTime);
+                break;
+            }
+            check = check.plusSeconds(60 * MIN_TASK_DURATION_MINUTES);
+        }
+
+        if (isValidate) {
+            check = task.getStartTime();
+
+            while (check.isBefore(endTime)) {
+                timeBookingTable.put(check, false);
+                check = check.plusSeconds(60 * MIN_TASK_DURATION_MINUTES);
+            }
+        } else {
+            System.out.println("Время занято: " + startTime);
+        }
+        return isValidate;
     }
 }

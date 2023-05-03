@@ -6,14 +6,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
-    private Path file;
-    private final static String FILE_TABLE_HEADER = "id,type,name,status,description,epic";
+    private final Path file;
+    private final static String FILE_TABLE_HEADER = "id,type,name,status,description,startTime,duration,endTime,epic";
 
     public FileBackedTasksManager(Path file) throws ManagerSaveException {
         try {
@@ -28,23 +26,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         try {
             String content = Files.readString(path);
             FileBackedTasksManager manager = new FileBackedTasksManager(path);
-
-            /*
-             проверка на файл, который содержит шапку + пустую строку (после удаления тасков), наверное
-             cамое простое:
-
-            if (content.equals(FILE_TABLE_HEADER + "\n")) {
-                ...
-            }
-             но решил добавить (вероятно кривоватый как и все остальное:D) валидатор для истории isValidateHistoryString()
-             только для истории - потому что для нее всегда берется строка с индексом на 1 меньше размера
-             распарсенного содержимого файла (задачу просто не возьмем, если файл кроме шапки пуст
-             соответсвенно, если попала пустая строка, или выражение в шапке, или неверный формат
-             (не числа через запятую) - вернет менеджер с пустой историей
-
-             для задач аналогичную проверку делать не стал, потому что как я понял исходим из аксиомы (по тз),
-             что файл намеренно никто не ломает и он приходит в верном формате
-             */
 
             String[] fileContent = content.split("\n");
             int i = 1;
@@ -100,7 +81,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         boolean isValidate = true;
         String[] valueSplit = value.split(",");
 
-        if (value.isEmpty() || value.isBlank() || value == null || valueSplit.length == 1) {
+        if (value.isEmpty() || value.isBlank() || valueSplit.length == 1) {
             isValidate = false;
         }
 
@@ -152,15 +133,35 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private Task fromString(String value) {
         String[] taskParams = value.split(",");
-        Integer id = Integer.parseInt(taskParams[Task.FILE_COLUM_NUM_ID]);
+        int id = Integer.parseInt(taskParams[Task.FILE_COLUM_NUM_ID]);
         String state = taskParams[Task.FILE_COLUM_NUM_STATE];
         String name = taskParams[Task.FILE_COLUM_NUM_NAME];
         String description = taskParams[Task.FILE_COLUM_NUM_DESCR];
         String type = taskParams[Task.FILE_COLUM_NUM_TYPE];
+
+        String stringStartTime = taskParams[Task.FILE_COLUM_NUM_STARTTIME];
+        //если пустой то now, если нет то в число
+        Instant startTime;
+        if (stringStartTime.isEmpty()) {
+            startTime = Instant.now();
+        } else {
+            startTime = Instant.parse(stringStartTime);
+        }
+
+        int duration = Integer.parseInt(taskParams[Task.FILE_COLUM_NUM_DURATION]);
+        String stringEndTime = taskParams[Task.FILE_COLUM_NUM_ENDTIME];
+        //если пустой то now, если нет то в число
+        Instant endTime;
+        if (stringEndTime.isEmpty()) {
+            endTime = Instant.now();
+        } else {
+            endTime = Instant.parse(stringEndTime);
+        }
+
         Integer lastTaskId = taskId;
 
         if (type.equals(TasksType.TASK.toString())) {
-            Task task = new Task(name, description, TaskState.valueOf(state));
+            Task task = new Task(name, description, TaskState.valueOf(state), startTime, duration);
             taskId = id;
             super.createTask(task);
             taskId = Math.max(taskId, lastTaskId);
@@ -177,7 +178,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
         if (type.equals(TasksType.SUBTASK.toString())) {
             int epicBelongs = Integer.parseInt(taskParams[Task.FILE_COLUM_NUM_EPICBELONGS]);
-            Subtask subtask = new Subtask(name, description, TaskState.valueOf(state), epicsList.get(epicBelongs));
+            Subtask subtask = new Subtask(name, description, TaskState.valueOf(state), epicsList.get(epicBelongs),
+                    startTime, duration);
             taskId = id;
             super.createSubtask(subtask);
             taskId = Math.max(taskId, lastTaskId);
