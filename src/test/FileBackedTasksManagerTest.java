@@ -41,6 +41,11 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         manager.getTaskById(0);
 
         FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(path);
+
+        assertArrayEquals(manager2.getTasksList().toArray(), manager.getTasksList().toArray());
+        assertArrayEquals(manager2.getSubtasksList().toArray(), manager.getSubtasksList().toArray());
+        assertArrayEquals(manager2.getEpicsList().toArray(), manager.getEpicsList().toArray());
+        assertArrayEquals(manager2.getHistoryList().toArray(), manager.getHistoryList().toArray());
     }
 
     @Test
