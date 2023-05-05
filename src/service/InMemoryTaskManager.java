@@ -11,21 +11,18 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epicsList = new HashMap<>();
     protected final HashMap<Integer, Subtask> subtasksList = new HashMap<>();
     protected final HashMap<Instant, Boolean> timeBookingTable = new HashMap<>();
-    protected final TreeSet<Task> prioritizedTasks = new TreeSet<Task>(new Comparator<>() {
-        @Override
-        public int compare(Task o1, Task o2) {
-            if (o1.getTaskId() == o2.getTaskId()) {
-                return 0;
-            }
-            if (!o1.isUserSetTime()) {
-                return 1;
-            }
-            if (!o2.isUserSetTime()) {
-                return -1;
-            }
-            return o1.getStartTime().compareTo(o2.getStartTime());
+    protected final TreeSet<Task> prioritizedTasks = new TreeSet<>((Task o1, Task o2) -> {
+        if (o1.getTaskId() == o2.getTaskId()) {
+            return 0;
         }
-    });
+        if (!o1.isUserSetTime()) {
+            return 1;
+        }
+        if (!o2.isUserSetTime()) {
+            return -1;
+        }
+        return o1.getStartTime().compareTo(o2.getStartTime());
+        });
     protected Integer taskId = 0;
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
     protected static final int MIN_TASK_DURATION_MINUTES = 15;
@@ -218,29 +215,31 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
-        if (isValidateTaskTime(task)) {
-            prioritizedTasks.remove(getTaskById(task.getTaskId()));
+        if (isValidateTaskTime(task) && tasksList.containsKey(task.getTaskId())) {
+            prioritizedTasks.remove(task); //у задач разные поля, но компаратор возвращает 0 при равных айди
             tasksList.put(task.getTaskId(), task);
             prioritizedTasks.add(task);
         } else {
-            System.out.println("Время в обновленной задаче некорректное");
+            System.out.println("Задачи с таким id нет или время в обновленной задаче некорректное");
         }
     }
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        if (isValidateTaskTime(subtask)) {
-            prioritizedTasks.remove(getSubtaskById(subtask.getTaskId()));
+        if (isValidateTaskTime(subtask) && subtasksList.containsKey(subtask.getTaskId())) {
+            prioritizedTasks.remove(subtask);
             subtasksList.put(subtask.getTaskId(), subtask);
 
             Epic epic;
             epic = epicsList.get(subtask.getBelongsToEpicId());
 
+            prioritizedTasks.remove(epic);
             epic.setTaskState(calculateEpicState(epic));
             epic.setDuration(calculateEpicDuration(epic));
             epic.setStartTime(calculateEpicStartTime(epic));
             epic.setEndTime(epic.getDuration());
             prioritizedTasks.add(subtask);
+            prioritizedTasks.add(epic);
         } else {
             System.out.println("Время в обновленной задаче некорректное");
         }
