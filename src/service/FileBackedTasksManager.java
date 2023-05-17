@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
 
@@ -22,7 +23,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    public static FileBackedTasksManager loadFromFile(Path path) {
+    public FileBackedTasksManager() throws ManagerSaveException {
+        try {
+            Files.deleteIfExists(Path.of("default.csv"));
+            this.file = Files.createFile(Path.of("default.csv"));
+        } catch (IOException e) {
+            throw new ManagerSaveException("IOex при создании менеджера");
+        }
+    }
+
+    public static FileBackedTasksManager load(Path path) {
         try {
             String content = Files.readString(path);
             FileBackedTasksManager manager = new FileBackedTasksManager(path);
@@ -107,7 +117,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return historyIdList;
     }
 
-    private void save() throws ManagerSaveException {
+    protected void save() throws ManagerSaveException {
         try (FileWriter fileWriter = new FileWriter(file.toString())) {
             fileWriter.write(FILE_TABLE_HEADER);
         } catch (IOException e) {

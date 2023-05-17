@@ -1,14 +1,16 @@
 import model.*;
+import server.KVServer;
 import service.*;
 
-import java.nio.file.Paths;
 import java.time.Instant;
 
 public class Main {
 
     public static void main(String[] args) {
+        try {
+            new KVServer().start();
 
-            FileBackedTasksManager manager = Managers.getFileManager(Paths.get("taskmanager.csv"));
+            HttpTaskManager manager = Managers.getDefault("http://localhost:" + KVServer.PORT);
 
             Task task1 = manager.createTask(new Task("1st task", "1st task descr", TaskState.NEW,
                     Instant.parse("2023-06-05T00:00:00Z"), 60));
@@ -24,8 +26,14 @@ public class Main {
                     TaskState.NEW, epic1,Instant.parse("2023-06-05T02:00:00Z"), 30));
             Subtask sub2 = manager.createSubtask(new Subtask("2d sub", "2d sub descr",
                     TaskState.NEW, epic2));
+            Long token = manager.getToken();
 
-            System.out.println("Prioritized:");
-            System.out.println(manager.getPrioritizedTasks());
+            HttpTaskManager manager2 = new HttpTaskManager("http://localhost:" + KVServer.PORT, token);
+            System.out.println(manager2.getTasksList());
+            System.out.println(manager2.getSubtasksList());
+            System.out.println(manager2.getEpicsList());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

@@ -36,6 +36,6 @@ class SubtaskTest {
     @Test
     @DisplayName("Тест проверки на наличие эпика ")
     void getBelongsToEpicId() {
-        assertEquals(100500, subtask.getBelongsToEpicId());
+        assertEquals(100500, subtask.getEpicBelongsId());
     }
 }

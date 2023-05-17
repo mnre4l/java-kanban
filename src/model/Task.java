@@ -23,6 +23,11 @@ public class Task {
     public static final int FILE_COLUM_NUM_DURATION = 6;
     public static final int FILE_COLUM_NUM_ENDTIME = 7;
 
+    public Task() {
+        this.startTime = Instant.now();
+        this.duration = 0;
+    }
+
     public Task(String taskName, String taskDescription, TaskState state) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;

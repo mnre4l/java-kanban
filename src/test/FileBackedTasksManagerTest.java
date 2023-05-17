@@ -37,7 +37,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         manager.getEpicById(1);
         manager.getTaskById(0);
 
-        FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(path);
+        FileBackedTasksManager manager2 = FileBackedTasksManager.load(path);
 
         assertNotEquals(manager2, manager); //проверка, что разные ссылки
         assertArrayEquals(manager2.getTasksList().toArray(), manager.getTasksList().toArray());
@@ -50,7 +50,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     @DisplayName("Проверка работы по сохранению и восстановлению состояния - пустой список задач")
     void emptyTaskListLoadFromFile() {
-        FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(path);
+        FileBackedTasksManager manager2 = FileBackedTasksManager.load(path);
 
         assertTrue(manager2.getHistoryList().isEmpty());
         assertTrue(manager2.getTasksList().isEmpty());
@@ -63,7 +63,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @DisplayName("Проверка работы по сохранению и восстановлению состояния - эпик без подзадач")
     void justEpicLoadFromFile() {
         Epic epic = manager.createEpic(new Epic("epic1", "descr epic1"));
-        FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(path);
+        FileBackedTasksManager manager2 = FileBackedTasksManager.load(path);
 
         assertTrue(manager2.getHistoryList().isEmpty());
         assertTrue(manager2.getTasksList().isEmpty());
@@ -83,7 +83,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         manager.createSubtask(new Subtask("sub2", "descr2", TaskState.DONE, epic,
                 Instant.parse("2023-06-05T04:00:00Z"), 30));
 
-        FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(path);
+        FileBackedTasksManager manager2 = FileBackedTasksManager.load(path);
 
         assertNotEquals(manager2, manager); //проверка, что разные ссылки
         assertArrayEquals(manager2.getTasksList().toArray(), manager.getTasksList().toArray());

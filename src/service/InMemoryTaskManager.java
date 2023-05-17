@@ -4,14 +4,13 @@ import model.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.Comparator;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasksList = new HashMap<>();
     protected final HashMap<Integer, Epic> epicsList = new HashMap<>();
     protected final HashMap<Integer, Subtask> subtasksList = new HashMap<>();
     protected final HashMap<Instant, Boolean> timeBookingTable = new HashMap<>();
-    protected final TreeSet<Task> prioritizedTasks = new TreeSet<>((Task o1, Task o2) -> {
+    protected final TreeSet<Task> prioritizedTasks = new TreeSet<>((o1, o2) -> {
         if (o1.getTaskId() == o2.getTaskId()) {
             return 0;
         }
@@ -72,8 +71,11 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setTaskId(taskId);
         prioritizedTasks.add(subtask);
         taskId++;
+
         Epic epic;
-        epic = epicsList.get(subtask.getBelongsToEpicId());
+        epic = epicsList.get(subtask.getEpicBelongsId());
+
+        epic.addSubTask(subtask);
         epic.setTaskState(calculateEpicState(epic));
         epic.setDuration(calculateEpicDuration(epic));
         epic.setStartTime(calculateEpicStartTime(epic));
@@ -111,7 +113,7 @@ public class InMemoryTaskManager implements TaskManager {
             prioritizedTasks.remove(getSubtaskById(id));
             historyManager.remove(id);
 
-            Integer epicId = subtasksList.get(id).getBelongsToEpicId();
+            Integer epicId = subtasksList.get(id).getEpicBelongsId();
 
             epicsList.get(epicId).setDuration(0);
             epicsList.get(epicId).setStartTime(Instant.now());
@@ -159,7 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(subtasksList.get(id));
             return subtasksList.get(id);
         } else {
-            System.out.println("Сабтаска с таким id у этого эпика нет");
+            System.out.println("Сабтаска с таким id нет");
             return null;
         }
     }
@@ -203,7 +205,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic;
         subtask = subtasksList.get(id);
         prioritizedTasks.remove(subtask);
-        epic = epicsList.get(subtask.getBelongsToEpicId());
+        epic = epicsList.get(subtask.getEpicBelongsId());
         epic.deleteSubTask(subtask); //удалили ссылку на суб из эпика
         subtasksList.remove(id);
         epic.setTaskState(calculateEpicState(epic));
@@ -231,7 +233,7 @@ public class InMemoryTaskManager implements TaskManager {
             subtasksList.put(subtask.getTaskId(), subtask);
 
             Epic epic;
-            epic = epicsList.get(subtask.getBelongsToEpicId());
+            epic = epicsList.get(subtask.getEpicBelongsId());
 
             prioritizedTasks.remove(epic);
             epic.setTaskState(calculateEpicState(epic));

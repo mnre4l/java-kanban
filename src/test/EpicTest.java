@@ -6,6 +6,9 @@ import model.TaskState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import service.InMemoryTaskManager;
+import service.Managers;
+
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,15 +16,19 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Тест модели - эпик")
 class EpicTest {
     Epic epic = null;
+    InMemoryTaskManager manager;
     @BeforeEach
     void createEpic() {
+        manager = Managers.getInMemoryManager();
         epic = new Epic("itIsEpic", "itIsEpicDescr");
+        manager.createEpic(epic);
     }
 
     @Test
     @DisplayName("Проверка добавление сабтаска к эпику")
     void addSubTask() {
         Subtask subtask = new Subtask("subname", "subdescr", TaskState.IN_PROGRESS, epic);
+        manager.createSubtask(subtask);
 
         assertNotNull(epic.getSubTasksList());
         assertEquals(epic.getSubTasksList().size(), 1, "Размер списка сохраненных сабтасков неверный");
@@ -33,6 +40,7 @@ class EpicTest {
     @DisplayName("Проверка удаления сабтаска из эпика")
     void deleteSubTask() {
         Subtask subtask = new Subtask("subname", "subdescr", TaskState.IN_PROGRESS, epic);
+        manager.createSubtask(subtask);
 
         assertNotNull(epic.getSubTasksList());
         assertEquals(epic.getSubTasksList().size(), 1, "Число сабтасков неверное");
@@ -45,6 +53,7 @@ class EpicTest {
     @DisplayName("Получение списка эпиков")
     void getSubTasksList() {
         Subtask subtask = new Subtask("subname", "subdescr", TaskState.IN_PROGRESS, epic);
+        manager.createSubtask(subtask);
 
         assertNotNull(epic.getSubTasksList());
         assertEquals(epic.getSubTasksList().size(), 1, "Число сабтасков неверное");

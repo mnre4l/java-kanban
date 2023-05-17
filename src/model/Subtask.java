@@ -3,13 +3,18 @@ package model;
 import java.time.Instant;
 
 public class Subtask extends Task {
-    private final Integer epicBelongsId;
+    private Integer epicBelongsId;
 
-    public Subtask(String taskName, String taskDescription, TaskState state, Epic belongsToEpic) {
+    public Subtask(String taskName, String taskDescription, TaskState state, int epicId) {
         super(taskName, taskDescription, state);
-        this.epicBelongsId = belongsToEpic.getTaskId();
+        this.epicBelongsId = epicId;
         this.taskType = TasksType.SUBTASK;
-        belongsToEpic.addSubTask(this); // добавляем субтаск в список субтасков этого эпика
+    }
+
+    public Subtask(String taskName, String taskDescription, TaskState state, Epic epic) {
+        super(taskName, taskDescription, state);
+        this.epicBelongsId = epic.getTaskId();
+        this.taskType = TasksType.SUBTASK;
     }
 
     public Subtask(String taskName, String taskDescription, TaskState state, Epic belongsToEpic, Instant startTime,
@@ -26,8 +31,11 @@ public class Subtask extends Task {
         return super.toString() + this.epicBelongsId;
     }
 
-    public Integer getBelongsToEpicId() {
+    public Integer getEpicBelongsId() {
         return epicBelongsId;
     }
 
+    public void setEpicBelongsId(int id) {
+        this.epicBelongsId = id;
+    }
 }

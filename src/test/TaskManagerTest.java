@@ -14,9 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
-@Disabled
 abstract class TaskManagerTest<T extends TaskManager> {
     T manager;
 
@@ -99,7 +97,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertNotNull(manager.getPrioritizedTasks(), "Приоритетные задачи не вернулись");
         //для эпика, к которому сабтаск относится
         assertTrue(epic.getSubTasksList().contains(subtask), "Саб не сохранился в списке сабов у эпика");
-        assertEquals(epic.getTaskId(), subtask.getBelongsToEpicId(), "Айди эпиков различаются");
+        assertEquals(epic.getTaskId(), subtask.getEpicBelongsId(), "Айди эпиков различаются");
     }
 
 
