@@ -359,7 +359,7 @@ public class HttpTaskServer {
 
     private boolean isCorrectParametersWhenUpdateTask(Task task, Integer idFromJson) {
         return task.getTaskId() != null
-                && idFromJson == task.getTaskId()
+                && idFromJson.equals(task.getTaskId())
                 && task.getTaskState() != null
                 && !task.getTaskName().isBlank()
                 && !task.getTaskDescription().isBlank();

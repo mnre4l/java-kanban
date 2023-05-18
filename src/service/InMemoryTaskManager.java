@@ -11,7 +11,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Subtask> subtasksList = new HashMap<>();
     protected final HashMap<Instant, Boolean> timeBookingTable = new HashMap<>();
     protected final TreeSet<Task> prioritizedTasks = new TreeSet<>((o1, o2) -> {
-        if (o1.getTaskId() == o2.getTaskId()) {
+        if (o1.getTaskId().equals(o2.getTaskId())) {
             return 0;
         }
         if (!o1.isUserSetTime()) {
@@ -32,9 +32,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getPrioritizedTasks() {
-        List<Task> list = new ArrayList<>();
-        list.addAll(prioritizedTasks);
-        return list;
+        return new ArrayList<>(prioritizedTasks);
     }
 
     @Override

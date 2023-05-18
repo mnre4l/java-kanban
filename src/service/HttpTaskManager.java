@@ -7,14 +7,13 @@ import model.Task;
 import server.KVTaskClient;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class HttpTaskManager extends FileBackedTasksManager implements TaskManager {
-    private static KVTaskClient client;
+    private KVTaskClient client;
     private static Gson gson;
 
     public HttpTaskManager(String kvServerUrl) throws ManagerSaveException {
@@ -33,7 +32,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
     }
 
     @Override
-    protected void save() throws ManagerSaveException {
+    protected void save() {
         client.put("tasks", gson.toJson(tasksList));
         client.put("epics", gson.toJson(epicsList));
         client.put("subtasks", gson.toJson(subtasksList));
@@ -46,6 +45,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
     }
 
     public void load() {
+        int maxId = 0;
         HashMap<Integer, Task> tasks = gson.fromJson(client.load("tasks"),
                 new TypeToken<HashMap<Integer, Task>>(){}.getType());
         HashMap<Integer, Epic> epics = gson.fromJson(client.load("epics"),
@@ -56,13 +56,16 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
         for (Integer id : tasks.keySet()) {
             this.tasksList.put(id, tasks.get(id));
             this.prioritizedTasks.add(tasks.get(id));
+            maxId = Math.max(maxId, id);
         }
         for (Integer id : subtasks.keySet()) {
             this.subtasksList.put(id, subtasks.get(id));
             this.prioritizedTasks.add(subtasks.get(id));
+            maxId = Math.max(maxId, id);
         }
         for (Integer id : epics.keySet()) {
             this.epicsList.put(id, epics.get(id));
+            maxId = Math.max(maxId, id);
         }
         Collections.reverse(history);
         for (Integer id : history) {
@@ -70,5 +73,6 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
             this.getEpicById(id);
             this.getSubtaskById(id);
         }
+        this.taskId = ++maxId;
     }
 }

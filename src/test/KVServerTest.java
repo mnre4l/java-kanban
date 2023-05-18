@@ -42,7 +42,7 @@ public class KVServerTest {
                     .uri(uri)
                     .POST(body)
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            client.send(request, HttpResponse.BodyHandlers.ofString());
 
             URI uri2 = URI.create("http://localhost:" + PORT + "/load" + "/iamkey?" + "API_TOKEN=DEBUG");
             HttpRequest request2 = HttpRequest.newBuilder()

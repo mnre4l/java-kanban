@@ -38,7 +38,7 @@ class InMemoryHistoryManagerTest {
         assertEquals(historyManager.getHistory().size(), 3, "Число сохраненных задач нерверное");
         assertNotNull(historyManager.getHistory(), "Список истории = null");
         historyManager.getHistory().forEach(task -> {
-            assertTrue(List.of(firstTask.getTaskId(), secondTask.getTaskId(),
+                    assertTrue(List.of(firstTask.getTaskId(), secondTask.getTaskId(),
                     thirdTask.getTaskId()).contains(task.getTaskId()), "Задачи нет в истории: " + task.getTaskName());
         });
     }

@@ -7,7 +7,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class KVTaskClient {
-    private URI registerUrl;
     private long token;
     private String serverUrl;
     private final HttpClient client = HttpClient.newHttpClient();
@@ -24,7 +23,7 @@ public class KVTaskClient {
 
     private void init(String stringUrl) {
         this.serverUrl = stringUrl;
-        this.registerUrl = URI.create(stringUrl + "/register");
+        URI registerUrl = URI.create(stringUrl + "/register");
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(registerUrl)
